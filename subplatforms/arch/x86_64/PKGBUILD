@@ -1,0 +1,37 @@
+# Maintainer: TotalDrop <hello@totaldrop.app>
+# SPDX-FileCopyrightText: 2026 The TotalDrop Contributors
+# SPDX-License-Identifier: GPL-3.0-or-later
+#
+# Isolated Arch Linux sub-platform PKGBUILD for `x86_64` (ADR 0020).
+
+pkgname=totaldrop
+_ver=0.3.0-beta.6
+pkgver=${_ver//-/_}
+pkgrel=1
+pkgdesc='Send files straight to another device, end-to-end encrypted'
+arch=('x86_64')
+url='https://totaldrop.app'
+license=('GPL-3.0-or-later' 'MIT OR Apache-2.0')
+depends=('qt6-base' 'qt6-declarative' 'qt6-wayland' 'qt6-svg'
+         'xdg-desktop-portal' 'hicolor-icon-theme' 'ttf-font' 'gcc-libs' 'glibc')
+makedepends=('cargo' 'lld')
+options=('!lto' '!debug')
+source=("$pkgname-$_ver.tar.gz::https://github.com/totaldrop-app/totaldrop-linux/archive/refs/tags/linux-arch-x86_64-v$_ver.tar.gz")
+sha256sums=('SKIP')
+
+_triple=x86_64-unknown-linux-gnu
+
+build() {
+  cd "$srcdir/totaldrop-linux-linux-arch-x86_64-v$_ver"
+  export RUSTUP_TOOLCHAIN=${TOTALDROP_RUST:-${RUSTUP_TOOLCHAIN:-1.99.1}}
+  export CXX_QT_AUTORCC_OPTIONS=--format-version:1:--no-zstd
+  cargo --config target-x86_64/cargo-config.toml build --frozen --release \
+    --target "$_triple" -p totaldrop-linux -p totaldrop-cli
+}
+
+package() {
+  cd "$srcdir/totaldrop-linux-linux-arch-x86_64-v$_ver"
+  packaging-common/linux/install.sh "$pkgdir" /usr "target/$_triple/release"
+  install -Dm644 -t "$pkgdir/usr/share/licenses/$pkgname" \
+    LICENSES/GPL-3.0-or-later.txt LICENSES/MIT.txt LICENSES/Apache-2.0.txt
+}

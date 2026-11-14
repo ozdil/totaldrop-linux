@@ -1,0 +1,22 @@
+# SPDX-FileCopyrightText: 2026 The TotalDrop Contributors
+# SPDX-License-Identifier: GPL-3.0-or-later
+#
+# Isolated sub-platform x CPU architecture recipe manifest (ADR 0020).
+
+unit_id = "linux-arch-arm64"
+repository = "totaldrop-linux"
+platform = "linux"
+format = "arch"
+arch = "arm64"
+version = "0.3.0-beta.6"
+rust_target = "aarch64-unknown-linux-gnu"
+runner = "ubuntu-24.04-arm"
+tag_prefix = "linux-arch-arm64-v"
+workflow = ".github/workflows/pkg-arch-arm64.yml"
+delegate = "target-arm64/arch/PKGBUILD"
+artifact_name = "totaldrop-0.3.0-beta.6-aarch64.pkg.tar.zst"
+spdx_license = "GPL-3.0-or-later"
+reproducible = true
+provenance = "sigstore-oidc"
+checksums_file = "SHA256SUMS"
+l10n_locales = 35

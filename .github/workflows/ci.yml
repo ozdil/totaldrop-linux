@@ -66,6 +66,8 @@ jobs:
           dash packaging-common/test-check-package-contents.sh
       - name: Nautilus extension tests
         run: python3 -I packaging-common/linux/file-managers/test_totaldrop_nautilus.py
+      - name: Verify 16 isolated sub-platform x CPU units
+        run: python3 tools/verify-subplatforms.py
 
   qt6-wayland-desktop:
     name: Qt 6 Wayland Desktop (${{ matrix.os }})

@@ -1,0 +1,22 @@
+# SPDX-FileCopyrightText: 2026 The TotalDrop Contributors
+# SPDX-License-Identifier: GPL-3.0-or-later
+#
+# Isolated sub-platform x CPU architecture recipe manifest (ADR 0020).
+
+unit_id = "linux-arch-riscv64"
+repository = "totaldrop-linux"
+platform = "linux"
+format = "arch"
+arch = "riscv64"
+version = "0.3.0-beta.6"
+rust_target = "riscv64gc-unknown-linux-gnu"
+runner = "ubuntu-latest"
+tag_prefix = "linux-arch-riscv64-v"
+workflow = ".github/workflows/pkg-arch-riscv64.yml"
+delegate = "target-riscv64/cargo-config.toml"
+artifact_name = "totaldrop-0.3.0-beta.6-riscv64.pkg.tar.zst"
+spdx_license = "GPL-3.0-or-later"
+reproducible = true
+provenance = "sigstore-oidc"
+checksums_file = "SHA256SUMS"
+l10n_locales = 35
