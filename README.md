@@ -17,7 +17,7 @@ Synced at upstream commit `ebe2b19` (`totaldrop-linux` `0.3.0-beta.6`, core work
 ├── l10n/                       # Compile-time ARB message catalogs & status metadata (35 languages)
 │
 ├── crates/                     # LAYER 1: Pure-Rust Core, Protocol, Crypto, Localization & CLI
-│   ├── totaldrop-crypto/       #   CPace PAKE, X25519 + Ed25519 keys, ChaCha20-Poly1305 AEAD
+│   ├── totaldrop-crypto/       #   CPace PAKE, X25519 and Ed25519 signatures, plus stream AEAD
 │   ├── totaldrop-proto/        #   Wire framing, transfer codes, relay/STUN codecs, PCP/NAT-PMP
 │   ├── totaldrop-core/         #   QUIC transport, multipath relay fallback, UPnP/PCP/NAT-PMP leases
 │   ├── totaldrop-l10n/         #   Compile-time ICU MessageFormat + CLDR plural/number formatting

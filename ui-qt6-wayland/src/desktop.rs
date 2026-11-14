@@ -258,6 +258,7 @@ pub async fn notify(title: String, body: String) {
 /// Pure-Rust desktop session classification (`XDG_CURRENT_DESKTOP`,
 /// `QT_QPA_PLATFORMTHEME`, `TOTALDROP_THEME`, and Omarchy state presence),
 /// shared with host unit testing when Qt 6 is not installed.
+#[cfg(any(test, not(totaldrop_cargo_build)))]
 pub fn resolve_theme_source(
     forced: Option<&str>,
     xdg_desktop: &str,

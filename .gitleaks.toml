@@ -1,0 +1,13 @@
+# SPDX-FileCopyrightText: 2026 The TotalDrop Contributors
+# SPDX-License-Identifier: GPL-3.0-or-later
+
+title = "TotalDrop Linux Gitleaks Configuration"
+
+[extend]
+useDefault = true
+
+[allowlist]
+description = "Allowlist initial root commit false-positive on stream AEAD cipher name in README"
+commits = [
+    "ba5ffd5f3e491ecbd035ed2a246383084634ca27",
+]
