@@ -1,0 +1,18 @@
+# SPDX-FileCopyrightText: 2026 The TotalDrop Contributors
+# SPDX-License-Identifier: GPL-3.0-or-later
+#
+# Cargo configuration for the ARM64 Linux target unit (aarch64-unknown-linux-gnu).
+# Enables baseline ARMv8-A NEON plus hardware AES/SHA2 cryptographic acceleration
+# across Apple Silicon (Asahi Linux), Qualcomm Snapdragon X, Raspberry Pi 5,
+# NVIDIA Grace / RTX Spark, and ARM64 workstations, linked with LLD + full RELRO.
+
+[build]
+target = "aarch64-unknown-linux-gnu"
+
+[target.aarch64-unknown-linux-gnu]
+linker = "cc"
+rustflags = [
+    "-C", "target-feature=+neon,+aes,+sha2",
+    "-C", "link-arg=-fuse-ld=lld",
+    "-C", "link-arg=-Wl,-z,relro,-z,now",
+]

@@ -1,0 +1,17 @@
+# SPDX-FileCopyrightText: 2026 The TotalDrop Contributors
+# SPDX-License-Identifier: GPL-3.0-or-later
+#
+# Cargo configuration for the x86_64 Linux target unit (x86_64-unknown-linux-gnu).
+# Uses baseline x86-64 instructions for universal compatibility across AMD/Intel
+# desktops, laptops, and the Steam Deck APU, linked with LLD and full RELRO.
+
+[build]
+target = "x86_64-unknown-linux-gnu"
+
+[target.x86_64-unknown-linux-gnu]
+linker = "cc"
+rustflags = [
+    "-C", "target-cpu=x86-64",
+    "-C", "link-arg=-fuse-ld=lld",
+    "-C", "link-arg=-Wl,-z,relro,-z,now",
+]

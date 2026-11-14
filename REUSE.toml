@@ -1,0 +1,27 @@
+# Copyright and license annotations for files that cannot carry SPDX comments
+# directly (JSON, ARB catalogs, SVG icons, XML metainfo, lockfiles, Markdown).
+# Source and script files carry explicit SPDX headers enforced by
+# tools/check-spdx.sh, and `reuse lint` checks the entire repository in CI.
+# Directory-level licensing policy is documented in LICENSING.md.
+version = 1
+
+# Default license across the Linux desktop app, CLI, packaging, tools, and CI.
+[[annotations]]
+path = "**"
+precedence = "closest"
+SPDX-FileCopyrightText = "2026 The TotalDrop Contributors"
+SPDX-License-Identifier = "GPL-3.0-or-later"
+
+# Shared protocol, cryptographic, and localization libraries plus the ARB
+# message catalogs compiled into totaldrop-l10n.
+[[annotations]]
+path = [
+  "crates/totaldrop-crypto/**",
+  "crates/totaldrop-proto/**",
+  "crates/totaldrop-core/**",
+  "crates/totaldrop-l10n/**",
+  "l10n/**",
+]
+precedence = "closest"
+SPDX-FileCopyrightText = "2026 The TotalDrop Contributors"
+SPDX-License-Identifier = "MIT OR Apache-2.0"

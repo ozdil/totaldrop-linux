@@ -1,0 +1,141 @@
+totaldrop (0.3.0~beta.6-1) unstable; urgency=medium
+
+  * Send a text instead of files: "Send text" on the Send screen, or
+    "Send clipboard" in the app's launcher menu. A text that arrives is
+    shown, not saved, with any hidden characters named, and "Copy text"
+    copies it exactly as it came. The command line can send a text too:
+    totaldrop send --text "...", or totaldrop send - for standard input.
+    A receiver on 0.3.0-beta.5 or older saves the text as text.txt.
+  * "Send with TotalDrop" in the right-click menu of Dolphin, Files
+    (once python3-nautilus is installed) and Nemo; "Send files" and
+    "Receive files" when you right-click TotalDrop in the taskbar or app
+    launcher.
+  * Software centres describe TotalDrop in all 35 languages of the app.
+  * The right-click menu of text fields is in the app's language where Qt
+    draws it (Qt 6.11 and later), and Qt's own windows follow
+    right-to-left languages.
+  * Settings says that codes and verification words stay in English, so
+    that two devices set to different languages show the same words.
+  * Security: a sending device no longer connects to its relay when the
+    receiving device uses a different relay or none, so that relay no
+    longer sees the sender's IP address. A receiver on 0.1 set to another
+    relay now needs a direct path.
+  * Security: when a send or receive fails on the command line, control
+    characters in the error's detail are named instead of passed to the
+    terminal (GHSA-c6jh-7p7q-8gg4).
+
+ -- TotalDrop <hello@totaldrop.app>  Sat, 07 Nov 2026 12:02:49 +0300
+
+totaldrop (0.3.0~beta.5-1) unstable; urgency=medium
+
+  * The translations built into the app are now under MIT OR Apache-2.0.
+    The package's copyright file says so for the translations and the
+    library that compiles them, and no longer repeats its licence
+    paragraphs.
+  * In the packages the project builds, the app's built-in Qt resources
+    no longer carry the time they were built, so two builds of the same
+    source come out the same there.
+
+ -- TotalDrop <hello@totaldrop.app>  Thu, 05 Nov 2026 10:30:00 +0300
+
+totaldrop (0.3.0~beta.4-1) unstable; urgency=medium
+
+  * A transfer that started on a direct connection no longer stops with
+    "timed out" when that path goes quiet, for example when Wi-Fi drops:
+    after 8 seconds without anything from the other device it moves onto the
+    relay and goes on. Both devices must use the same relay.
+  * A transfer through the relay survives a connection that dies without
+    either end noticing, for example after switching Wi-Fi networks: the
+    device notices within 10 seconds and connects again.
+  * The sending device's progress bar shows what has reached the other
+    device, instead of running ahead and showing a file as sent while it is
+    still on the way.
+  * When a transfer fails, the reason is now given in your language for many
+    failures, under Details. The technical message stays in English for
+    problem reports and is labelled as such.
+
+ -- TotalDrop <hello@totaldrop.app>  Wed, 04 Nov 2026 21:00:00 +0300
+
+totaldrop (0.3.0~beta.3-1) unstable; urgency=medium
+
+  * Opening files with TotalDrop while it is already open, for example with
+    "Open with" in a file manager, adds them to the open window instead of
+    starting a second one, and the window comes to the front.
+  * A transfer through the relay connects even when the relay is slow to get
+    going, instead of failing after 20 seconds, and reconnects when the
+    relay closes the connection. It is also faster when the relay is far
+    away.
+  * A transfer no longer sometimes stops right after the code is entered,
+    with "the other side left" on the sending device.
+  * Stop on the sending device now cuts the transfer at once; files still
+    being sent when you press Stop are no longer completed and kept on the
+    receiving device.
+
+ -- TotalDrop <hello@totaldrop.app>  Wed, 04 Nov 2026 08:30:00 +0300
+
+totaldrop (0.3.0~beta.2-1) unstable; urgency=medium
+
+  * On GNOME and on Hyprland without a Qt theme, the window takes the
+    colours of your GTK theme and follows a theme change at once; buttons,
+    fields and switches take the desktop's shape. Omarchy keeps its own
+    theme.
+  * Clearer messages: a code nobody is using, a code that expired and a
+    server address that is not valid are each named as such.
+  * Pasting the whole share message into the receive field finds the code in
+    it, invisible characters such as direction marks are dropped from a
+    pasted code, and codes typed with Arabic, Persian or Urdu digits are
+    accepted. In a right-to-left language the shared message shows the code
+    in order.
+  * The screens stay centred in a wide window and files in the Send list get
+    an icon for their kind. Escape goes back from Send, Receive and
+    Settings, Enter presses the focused button on the result screen, and Tab
+    reaches controls it used to skip, scrolling them into view.
+  * With some Mesa drivers (seen on Intel graphics) the window no longer
+    falls back to 16-bit colour, so its colours are no longer a shade off.
+  * totaldrop-desktop --help and --version print to the terminal instead of
+    opening the window.
+
+ -- TotalDrop <hello@totaldrop.app>  Tue, 03 Nov 2026 10:00:00 +0300
+
+totaldrop (0.3.0~beta.1-1) unstable; urgency=medium
+
+  * New mark, Köşe, and a new icon: a circle with one square corner. It
+    turns while a file is on its way.
+  * The interface in 31 more languages, including Arabic, Chinese, Hindi,
+    Japanese and Spanish. They are drafts being reviewed, so the security
+    texts stay in English until a language is checked.
+  * QR codes are read more reliably.
+
+ -- TotalDrop <hello@totaldrop.app>  Fri, 30 Oct 2026 09:00:00 +0300
+
+totaldrop (0.2.0~beta.1-1) unstable; urgency=medium
+
+  * Privacy mode in Settings: everything goes through the relay, so the
+    other device never learns your IP address.
+  * Stop now works at every stage, tells the other side, and leaves no
+    unfinished files behind.
+  * Adding a large folder no longer freezes the window.
+  * .deb and .rpm packages for ARM64 (Snapdragon X, NVIDIA RTX Spark).
+
+ -- TotalDrop <hello@totaldrop.app>  Thu, 29 Oct 2026 16:00:00 +0300
+
+totaldrop (0.1.0~beta.4-1) unstable; urgency=medium
+
+  * Transfers across the internet: devices connect directly through most
+    routers, or through the encrypted relay when they cannot.
+
+ -- TotalDrop <hello@totaldrop.app>  Wed, 28 Oct 2026 15:00:00 +0300
+
+totaldrop (0.1.0~beta.3-1) unstable; urgency=medium
+
+  * Sending to another device now works even when this computer's firewall
+    blocks incoming connections (as Omarchy's ufw does by default).
+
+ -- TotalDrop <hello@totaldrop.app>  Wed, 28 Oct 2026 01:00:00 +0300
+
+totaldrop (0.1.0~beta.2-1) unstable; urgency=medium
+
+  * First Linux release: send and receive with a code or a QR code,
+    following the desktop's theme.
+
+ -- TotalDrop <hello@totaldrop.app>  Tue, 27 Oct 2026 20:00:00 +0300

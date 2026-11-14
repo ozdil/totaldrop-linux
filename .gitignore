@@ -1,0 +1,19 @@
+/target
+*.swp
+.DS_Store
+
+# Built packages and staging directories
+dist/
+ui-qt6-wayland/.qmlls.ini
+
+# Python bytecode (Nautilus extension tests)
+__pycache__/
+*.pyc
+
+# Flatpak: generated Cargo offline sources and flatpak-builder work directories
+/packaging-common/flatpak/cargo-sources.json
+/target-x86_64/flatpak/cargo-sources.json
+/target-arm64/flatpak/cargo-sources.json
+.flatpak-builder/
+/flatpak-build/
+/flatpak-repo/

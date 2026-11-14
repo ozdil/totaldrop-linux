@@ -1,0 +1,64 @@
+# Maintainer: TotalDrop <hello@totaldrop.app>
+# SPDX-FileCopyrightText: 2026 The TotalDrop Contributors
+# SPDX-License-Identifier: GPL-3.0-or-later
+#
+# Native aarch64 Arch Linux ARM & Asahi Linux ALARM package for TotalDrop:
+# the Qt 6 Wayland desktop application and the CLI.
+
+pkgname=totaldrop
+_ver=0.3.0-beta.6
+pkgver=${_ver//-/_}
+pkgrel=1
+pkgdesc='Send files straight to another device, end-to-end encrypted'
+arch=('aarch64')
+url='https://totaldrop.app'
+license=('GPL-3.0-or-later' 'MIT OR Apache-2.0')
+depends=('qt6-base' 'qt6-declarative' 'qt6-wayland' 'qt6-svg'
+         'xdg-desktop-portal' 'hicolor-icon-theme' 'ttf-font' 'gcc-libs' 'glibc')
+makedepends=('cargo' 'lld')
+optdepends=('qqc2-desktop-style: Breeze controls under KDE Plasma (Asahi Linux)'
+            'xdg-desktop-portal-kde: file chooser under KDE Plasma'
+            'xdg-desktop-portal-gtk: file chooser under Hyprland, Omarchy and GNOME'
+            'xdg-desktop-portal-hyprland: Hyprland and Omarchy Wayland integration'
+            'noto-fonts: Arabic, Hebrew, Devanagari, Bengali, Thai and other scripts'
+            'noto-fonts-cjk: Chinese, Japanese and Korean'
+            'python-nautilus: "Send with TotalDrop" in the Nautilus menu')
+options=('!lto' '!debug')
+source=("$pkgname-$_ver.tar.gz::https://github.com/totaldrop-app/totaldrop/archive/refs/tags/linux-v$_ver.tar.gz")
+sha256sums=('SKIP')
+
+_srcdir() { echo "$srcdir/totaldrop-linux-v$_ver"; }
+_triple=aarch64-unknown-linux-gnu
+
+prepare() {
+  cd "$(_srcdir)"
+  export RUSTUP_TOOLCHAIN=${TOTALDROP_RUST:-${RUSTUP_TOOLCHAIN:-stable}}
+  cargo fetch --locked --target "$_triple"
+}
+
+build() {
+  cd "$(_srcdir)"
+  export RUSTUP_TOOLCHAIN=${TOTALDROP_RUST:-${RUSTUP_TOOLCHAIN:-stable}}
+  export CARGO_TARGET_DIR=target
+  # No build times in the embedded Qt resources (#252, #266; validated by
+  # packaging-common/check-versions.sh).
+  export CXX_QT_AUTORCC_OPTIONS=--format-version:1:--no-zstd
+  cargo --config target-arm64/cargo-config.toml build --frozen --release \
+    --target "$_triple" -p totaldrop-linux -p totaldrop-cli
+}
+
+check() {
+  cd "$(_srcdir)"
+  export RUSTUP_TOOLCHAIN=${TOTALDROP_RUST:-${RUSTUP_TOOLCHAIN:-stable}}
+  export CXX_QT_AUTORCC_OPTIONS=--format-version:1:--no-zstd
+  cargo --config target-arm64/cargo-config.toml test --frozen --release \
+    --target "$_triple" -p totaldrop-linux -p totaldrop-proto
+}
+
+package() {
+  cd "$(_srcdir)"
+  packaging-common/linux/install.sh "$pkgdir" /usr "target/$_triple/release"
+  install -Dm644 -t "$pkgdir/usr/share/licenses/$pkgname" \
+    LICENSES/GPL-3.0-or-later.txt LICENSES/MIT.txt LICENSES/Apache-2.0.txt
+  install -Dm644 LICENSING.md "$pkgdir/usr/share/licenses/$pkgname/LICENSING.md"
+}

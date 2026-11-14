@@ -1,0 +1,137 @@
+// SPDX-FileCopyrightText: 2026 The TotalDrop Contributors
+// SPDX-License-Identifier: GPL-3.0-or-later
+//
+//! TotalDrop for Linux: a Qt 6 Quick interface over `totaldrop-core`.
+//!
+//! The window is a native Wayland client (X11 still works through Qt's xcb
+//! backend). The compositor draws the frame. Colours, fonts, icons, control
+//! style and motion come from the desktop; see [`theme`].
+
+#![cfg_attr(test, allow(clippy::unwrap_used, clippy::expect_used))]
+
+mod bridge;
+mod desktop;
+mod flags;
+mod instance;
+mod runtime;
+mod settings;
+mod sleep;
+mod theme;
+
+use cxx_qt_lib::{QGuiApplication, QQmlApplicationEngine, QQuickStyle, QString, QUrl};
+
+/// The desktop entry and Wayland app id.
+pub const APP_ID: &str = "app.totaldrop.TotalDrop";
+
+/// Where distributions install Qt 6 QML modules across x86_64, arm64 and riscv64.
+const QML_DIRS: [&str; 5] = [
+    "/usr/lib/qt6/qml",
+    "/usr/lib64/qt6/qml",
+    "/usr/lib/x86_64-linux-gnu/qt6/qml",
+    "/usr/lib/aarch64-linux-gnu/qt6/qml",
+    "/usr/lib/riscv64-linux-gnu/qt6/qml",
+];
+
+fn has_qml_module(rel: &str) -> bool {
+    QML_DIRS
+        .iter()
+        .any(|d| std::path::Path::new(d).join(rel).join("qmldir").is_file())
+}
+
+/// Pick the Qt platform theme and control style before Qt starts.
+///
+/// - Plasma: its own platform theme (Qt loads it by itself) and the
+///   `org.kde.desktop` controls, so buttons and fields are Breeze.
+/// - Everywhere else, unless the person chose a platform theme: GTK's, so
+///   Qt follows the desktop's icon theme, font and colour scheme. Controls
+///   are Fusion, coloured from the desktop theme by the QML side.
+fn choose_style(session: &theme::Session) -> &'static str {
+    if session.is_kde() {
+        if has_qml_module("org/kde/desktop") {
+            return "org.kde.desktop";
+        }
+        return "Fusion";
+    }
+    let has_display =
+        std::env::var_os("WAYLAND_DISPLAY").is_some() || std::env::var_os("DISPLAY").is_some();
+    if has_display && std::env::var_os("QT_QPA_PLATFORMTHEME").is_none() {
+        // SAFETY: no other thread exists yet.
+        unsafe { std::env::set_var("QT_QPA_PLATFORMTHEME", "gtk3") };
+    }
+    "Fusion"
+}
+
+fn main() {
+    if let Some(flag) = flags::early(std::env::args_os().skip(1)) {
+        match flag {
+            flags::Flag::Help => {
+                print!(
+                    "{}",
+                    flags::help(&totaldrop_l10n::Strings::system(
+                        totaldrop_l10n::Domain::Cli
+                    ))
+                );
+            }
+            flags::Flag::Version => println!("totaldrop-desktop {}", env!("CARGO_PKG_VERSION")),
+        }
+        return;
+    }
+    let session = theme::Session::current();
+    let style = choose_style(&session);
+    if std::env::var_os("QT_QUICK_CONTROLS_STYLE").is_none() {
+        QQuickStyle::set_style(&QString::from(style));
+    }
+    QQuickStyle::set_fallback_style(&QString::from("Fusion"));
+    bridge::surface::use_true_colour();
+
+    // One window per session: a later launch hands its files to the
+    // running window and exits (#178). The connection serves the window's
+    // D-Bus interface for as long as it runs. This starts the runtime's
+    // threads, so it comes after the environment is set above.
+    let cwd = std::env::current_dir().unwrap_or_default();
+    let request = instance::Request::from_args(std::env::args_os().skip(1), &cwd);
+    let _bus = match runtime::RUNTIME.block_on(instance::claim(&request)) {
+        instance::Claim::Forwarded { other } => {
+            // The other package's window has the request: say so, since
+            // no window of this one opens (#351).
+            if let Some(package) = other {
+                let text = bridge::texts::strings().get(package.running_key(), &[]);
+                eprintln!("totaldrop-desktop: {text}");
+                // A notification daemon that is activatable but does not
+                // start must not keep this launch alive.
+                runtime::RUNTIME.block_on(async {
+                    let notify = desktop::notify("TotalDrop".to_owned(), text);
+                    let _ = tokio::time::timeout(std::time::Duration::from_secs(2), notify).await;
+                });
+            }
+            return;
+        }
+        instance::Claim::Owner(conn) => Some(conn),
+        instance::Claim::Alone => None,
+    };
+
+    let mut app = QGuiApplication::new();
+    QGuiApplication::set_desktop_file_name(&QString::from(APP_ID));
+    if let Some(mut app) = app.as_mut() {
+        app.as_mut()
+            .set_application_name(&QString::from("totaldrop"));
+        app.as_mut()
+            .set_application_display_name(&QString::from("TotalDrop"));
+        app.as_mut()
+            .set_application_version(&QString::from(env!("CARGO_PKG_VERSION")));
+        app.as_mut()
+            .set_organization_domain(&QString::from("totaldrop.app"));
+    }
+
+    // Qt's own text (the right-click menu of text fields) in the same
+    // language as the rest of the window (#307).
+    bridge::qt_texts::install(bridge::texts::strings());
+
+    let mut engine = QQmlApplicationEngine::new();
+    if let Some(engine) = engine.as_mut() {
+        engine.load(&QUrl::from("qrc:/qt/qml/app/totaldrop/qml/Main.qml"));
+    }
+    if let Some(app) = app.as_mut() {
+        std::process::exit(app.exec());
+    }
+}

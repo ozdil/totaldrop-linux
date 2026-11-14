@@ -1,0 +1,74 @@
+# SPDX-FileCopyrightText: 2026 The TotalDrop Contributors
+# SPDX-License-Identifier: GPL-3.0-or-later
+#
+# TotalDrop for ARM64 Linux as a KDE 6 Wayland Flatpak, targeting Apple Silicon
+# (Asahi Linux), Qualcomm Snapdragon X laptops, Raspberry Pi 5, and ARM64
+# Wayland workstations (Plasma, Hyprland, Omarchy, GNOME).
+app-id: app.totaldrop.TotalDrop
+runtime: org.kde.Platform
+runtime-version: "6.11"
+sdk: org.kde.Sdk
+command: totaldrop-desktop
+finish-args:
+  # Transfers, rendezvous, and encrypted relay.
+  - --share=network
+  - --share=ipc
+  # Native Wayland client with X11 fallback for legacy XWayland sessions.
+  - --socket=wayland
+  - --socket=fallback-x11
+  - --device=dri
+  # Received files go strictly to ~/Downloads/TotalDrop.
+  - --filesystem=xdg-download/TotalDrop:create
+  # Desktop notifications when a transfer finishes (ui-qt6-wayland/src/desktop.rs).
+  - --talk-name=org.freedesktop.Notifications
+  # Read-only desktop theme integration (ui-qt6-wayland/src/theme):
+  # KDE Plasma kdeglobals, Omarchy theme directory, GTK 3/4 settings, and
+  # Hyprland's IPC socket for live corner rounding.
+  - --filesystem=xdg-config/kdeglobals:ro
+  - --filesystem=xdg-config/omarchy:ro
+  - --filesystem=xdg-data/omarchy:ro
+  - --filesystem=~/.local/state/omarchy:ro
+  - --filesystem=xdg-config/gtk-3.0:ro
+  - --filesystem=xdg-config/gtk-4.0:ro
+  - --filesystem=xdg-data/themes:ro
+  - --filesystem=xdg-run/hypr:ro
+modules:
+  - name: rust
+    buildsystem: simple
+    build-options:
+      strip: false
+      no-debuginfo: true
+    build-commands:
+      - ./install.sh --prefix=/app/rust --disable-ldconfig --components=rustc,cargo,rust-std-aarch64-unknown-linux-gnu
+    cleanup:
+      - "*"
+    sources:
+      - type: archive
+        only-arches: [aarch64]
+        url: https://static.rust-lang.org/dist/rust-1.99.1-aarch64-unknown-linux-gnu.tar.xz
+        sha256: a48fb1e853be56ce9b8e2751f5464dbd5e16440cd81e237920f3a5e7e806333e
+
+  - name: totaldrop
+    buildsystem: simple
+    build-options:
+      append-path: /app/rust/bin
+      env:
+        CARGO_HOME: /run/build/totaldrop/cargo
+        CARGO_NET_OFFLINE: "true"
+        QMAKE: /usr/bin/qmake
+        # No build times in embedded Qt resources (#252, #266).
+        CXX_QT_AUTORCC_OPTIONS: --format-version:1:--no-zstd
+    build-commands:
+      - cargo --config target-arm64/cargo-config.toml build --release --locked --offline --target aarch64-unknown-linux-gnu -p totaldrop-linux -p totaldrop-cli
+      - sh packaging-common/linux/install.sh "" /app target/aarch64-unknown-linux-gnu/release
+    sources:
+      - type: dir
+        path: ../..
+        skip:
+          - .git
+          - target
+          - dist
+          - .flatpak-builder
+          - flatpak-build
+          - flatpak-repo
+      - cargo-sources.json
